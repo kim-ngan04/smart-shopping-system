@@ -23,7 +23,7 @@ Trước khi bắt đầu, hãy đảm bảo bạn có:
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/BaoHust2004/ITSS-20242.git
+git clone https://github.com/kim-ngan04/smart-shopping-system
 cd ITSS-20242
 ```
 
@@ -53,7 +53,7 @@ cd ITSS-20242
 
 3. Khởi chạy backend server:
    ```bash
-   npm start
+   npm run dev
    ```
    Server sẽ chạy tại `http://localhost:5000`.
 
