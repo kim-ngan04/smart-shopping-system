@@ -18,8 +18,17 @@ import {
   Typography,
   Empty,
   message,
-  Tooltip
 } from "antd";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import NauModal from "./NauModal";
 import { BACK_END_URL } from '../../context/const';
 
@@ -28,10 +37,11 @@ const { TextArea } = Input;
 const { Title } = Typography;
 
 const CongThuc = () => {
-  const { user, congThuc, fetchCongThuc, monDo } = useData();
+  const { user, congThuc, fetchCongThuc, monDo, topRecipes, fetchTopRecipes } = useData();
 
   useEffect(() => {
     fetchCongThuc(user[0]?.id);
+    fetchTopRecipes(user[0]?.id);
   }, []);
 
   const monAn = monDo.filter((item) => item.type === 1);
@@ -229,6 +239,41 @@ const CongThuc = () => {
             ) : (
               <Empty description="Không có công thức" />
             )}
+          </Card>
+        </Col>
+      </Row>
+      <Row gutter={[24, 0]}>
+        <Col xs={24} xl={24}>
+          <Card
+            bordered={false}
+            className="circlebox tablespace mb-24"
+            title={
+              <Title level={4} style={{ margin: 0, color: "#1890ff" }}>
+                Top công thức được yêu thích nhất
+              </Title>
+            }
+          >
+            {topRecipes.length > 0 ? (
+          <>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={topRecipes}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="use" fill="#FF7F50" name="Số lần sử dụng" />
+              </BarChart>
+            </ResponsiveContainer>
+
+          </>
+        ) : (
+          <Empty description="Không có dữ liệu" />
+        )}
+
           </Card>
         </Col>
       </Row>

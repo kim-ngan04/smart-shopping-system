@@ -1,7 +1,3 @@
-// 
-
-
-
 import React, { useEffect, useState } from "react";
 import {
   Row,
@@ -18,6 +14,7 @@ import {
   Input,
   Modal,
 } from "antd";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useData } from "../../context/AppContext";
 import moment from "moment";
 import { BACK_END_URL } from "../../context/const";
@@ -31,6 +28,8 @@ const Kho = () => {
   const [filteredKho, setFilteredKho] = useState([]);
   const [suggestedDishes, setSuggestedDishes] = useState([]);
   const [suggestionModalVisible, setSuggestionModalVisible] = useState(false);
+  const [chartData, setChartData] = useState([]);
+  const [storageChartData, setStorageChartData] = useState([]);
 
   useEffect(() => {
     if (user && user[0] && user[0].id) {
@@ -39,12 +38,46 @@ const Kho = () => {
   }, [user]);
 
   useEffect(() => {
-    // Lọc dữ liệu dựa trên searchText
     const filteredData = kho.filter((item) =>
       item.food.name.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredKho(filteredData);
   }, [kho, searchText]);
+
+  useEffect(() => {
+    const now = moment();
+
+    // Tổng số lượng thực phẩm đã hết hạn
+    const expired = kho
+      .filter((item) => moment(item.expire).isBefore(now, "day"))
+      .reduce((total, item) => total + item.quantity, 0);
+
+    // Tổng số lượng thực phẩm chưa hết hạn
+    const notExpired = kho
+      .filter((item) => moment(item.expire).isSameOrAfter(now, "day"))
+      .reduce((total, item) => total + item.quantity, 0);
+
+    setChartData([
+      { name: "Đã hết hạn", value: expired },
+      { name: "Chưa hết hạn", value: notExpired },
+    ]);
+
+    // Tổng số lượng thực phẩm để tủ lạnh
+    const refrigerator = kho
+      .filter((item) => item.state === 1)
+      .reduce((total, item) => total + item.quantity, 0);
+
+    // Tổng số lượng thực phẩm để ngoài
+    const outside = kho
+      .filter((item) => item.state === 0)
+      .reduce((total, item) => total + item.quantity, 0);
+
+    setStorageChartData([
+      { name: "Để tủ lạnh", value: refrigerator },
+      { name: "Để ngoài", value: outside },
+    ]);
+  }, [kho]);
+
 
   const handleSearch = (value) => {
     setSearchText(value);
@@ -59,6 +92,19 @@ const Kho = () => {
     });
     setSuggestedDishes(suggestions);
     setSuggestionModalVisible(true);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`${BACK_END_URL}store/delete/${id}`);
+      const data = await res.json();
+      if (data.success === true) {
+        fetchKho(user[0].id);
+        message.success("Xóa thành công");
+      }
+    } catch (error) {
+      message.warning("Thất bại", error.message);
+    }
   };
 
   const columns = [
@@ -131,23 +177,13 @@ const Kho = () => {
     },
   ];
 
-  const handleDelete = async (id) => {
-    try {
-      const res = await fetch(`${BACK_END_URL}store/delete/${id}`);
-      const data = await res.json();
-      if (data.success === true) {
-        fetchKho(user[0].id);
-        message.success("Xóa thành công");
-      }
-    } catch (error) {
-      message.warning("Thất bại", error.message);
-    }
-  };
+  const COLORS = ["#FF8042", "#00C49F"];
+  const STORAGE_COLORS = ["#8884d8", "#82ca9d"];
 
   return (
     <div className="tabled">
-      <Row gutter={[24, 0]}>
-        <Col xs={24} xl={24}>
+      <Row gutter={[24, 24]}>
+        <Col xs={24} xl={16}>
           <Card
             bordered={false}
             className="circlebox tablespace mb-24"
@@ -159,9 +195,7 @@ const Kho = () => {
             extra={
               <Space>
                 {user && user[0] && user[0].role === 1 && (
-                  <Button type="primary" onClick={() => {}}>
-                    Thêm món đồ
-                  </Button>
+                  <Button type="primary">Thêm món đồ</Button>
                 )}
                 <Button type="default" onClick={handleSuggestDishes}>
                   Gợi ý món ăn
@@ -184,14 +218,67 @@ const Kho = () => {
                 rowKey={(record) => record.id}
               />
             ) : (
-              <Empty
-                description="Không có dữ liệu"
-                style={{ padding: "20px 0" }}
-              />
+              <Empty description="Không có dữ liệu" style={{ padding: "20px 0" }} />
             )}
           </Card>
         </Col>
+        <Col xs={24} xl={8}>
+          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            {/* Biểu đồ thống kê hết hạn */}
+            <Card
+              bordered={false}
+              title={<Title level={5}>Thống kê hạn sử dụng</Title>}
+            >
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+
+            {/* Biểu đồ thống kê nơi để */}
+            <Card
+              bordered={false}
+              title={<Title level={5}>Thống kê nơi bảo quản</Title>}
+            >
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={storageChartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {storageChartData.map((entry, index) => (
+                      <Cell key={`cell-storage-${index}`} fill={STORAGE_COLORS[index % STORAGE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+          </Space>
+        </Col>
       </Row>
+
       <Modal
         visible={suggestionModalVisible}
         onCancel={() => setSuggestionModalVisible(false)}

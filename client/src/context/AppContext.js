@@ -15,7 +15,7 @@ const AppContextProvider = ({ children }) => {
     const [nauAn, setNauAn] = useState([]);
     const [diChoShare, setDiChoShare] = useState([]);
     const [userNormal, setUserNormal] = useState([]);
-    const [doneToday, setDoneToday] = useState([]);
+    const [topRecipes, setTopRecipes] = useState([]);
 
     const history = useHistory();
 
@@ -193,6 +193,21 @@ const AppContextProvider = ({ children }) => {
         }
     };
 
+    const fetchTopRecipes = async (userId) => {
+        try {
+            const res = await fetch(`${BACK_END_URL}recipe/top/${userId}`);
+            const data = await res.json();
+            if (data.success) {
+                setTopRecipes(data.data);
+            } else {
+                message.error("Không thể lấy danh sách công thức yêu thích!");
+            }
+        } catch (error) {
+            console.error(error.message);
+            message.error("Lỗi: " + error.message);
+        }
+    };
+
 
     return (
         <AppContext.Provider value={{
@@ -217,6 +232,8 @@ const AppContextProvider = ({ children }) => {
             diChoShare,
             fetchUserNormal,
             userNormal,
+            fetchTopRecipes,
+            topRecipes,
         }}>
             {children}
         </AppContext.Provider>

@@ -123,5 +123,34 @@ module.exports = {
             console.error('Error deleting recipe: ', error.message);
             return res.json({ success: false, message: 'Error deleting recipe' });
         }
+    },
+    getTopRecipes: async (req, res) => {
+    const { id } = req.params; // Lấy idUser từ URL
+    const query = `SELECT * FROM recipe WHERE idUser = ? ORDER BY \`use\` DESC LIMIT 10`;
+
+    try {
+        const rows = await new Promise((resolve, reject) => {
+            connection.query(query, [id], (error, results) => {
+                if (error) {
+                    console.error('Error fetching top recipes: ', error);
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+
+        const data = rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            use: row.use,
+            desc: row.desc,
+        }));
+
+        return res.json({ success: true, data });
+    } catch (error) {
+        console.error('Error: ', error);
+        return res.json({ success: false });
     }
+},
 }

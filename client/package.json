@@ -16,6 +16,7 @@
     "antd": "^4.16.6",
     "apexcharts": "^3.27.1",
     "bro-fs": "^0.6.0",
+    "chart.js": "^4.4.9",
     "install": "^0.13.0",
     "moment": "^2.29.4",
     "react": "^17.0.2",
@@ -26,6 +27,7 @@
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.3.4",
     "react-scripts": "4.0.3",
+    "recharts": "^2.15.3",
     "styled-components": "^5.3.11",
     "web-vitals": "^1.1.2"
   },
