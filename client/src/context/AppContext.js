@@ -15,6 +15,7 @@ const AppContextProvider = ({ children }) => {
     const [nauAn, setNauAn] = useState([]);
     const [diChoShare, setDiChoShare] = useState([]);
     const [userNormal, setUserNormal] = useState([]);
+    const [doneToday, setDoneToday] = useState([]);
 
     const history = useHistory();
 
@@ -191,6 +192,7 @@ const AppContextProvider = ({ children }) => {
             message.error(error.message);
         }
     };
+
 
     return (
         <AppContext.Provider value={{

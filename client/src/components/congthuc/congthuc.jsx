@@ -18,6 +18,7 @@ import {
   Typography,
   Empty,
   message,
+  Tooltip
 } from "antd";
 import NauModal from "./NauModal";
 import { BACK_END_URL } from '../../context/const';
@@ -71,7 +72,7 @@ const CongThuc = () => {
       message.error("Lỗi: " + error.message);
     }
   };
-
+  
   const handleCancel = () => {
     setModalVisible(false);
   };
@@ -107,44 +108,71 @@ const CongThuc = () => {
     setMaterialValues(newMaterialValues);
   };
 
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`${BACK_END_URL}recipe/delete/${id}`, {
+        method: "GET",
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Xóa công thức thành công!");
+        await fetchCongThuc(user[0].id); 
+      } else {
+        message.error("Lỗi: " + data.message);
+      }
+    } catch (error) {
+      message.error("Lỗi: " + error.message);
+    }
+  };
+
   const columns = [
-    {
-      title: "Tên công thức",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => <strong>{text}</strong>,
-    },
-    {
-      title: "Mô tả",
-      dataIndex: "desc",
-      key: "desc",
-      ellipsis: true,
-    },
-    {
-      title: "Món nấu",
-      dataIndex: "food",
-      key: "food",
-      render: (item) => (
-        <Space>
-          <Avatar src={item.image} />
-          <span>{item.name}</span>
-        </Space>
-      ),
-    },
-    {
-      title: "Nguyên liệu",
-      dataIndex: "materials",
-      key: "materials",
-      render: (items) =>
-        items.map((item) => (
-          <Tag key={item.id} color="blue">
-            {item.name} x{item.quantity} {item.unit}
-          </Tag>
-        )),
-    },
-    {
-      title: "Thao tác",
-      render: (text, record) => (
+  {
+    title: "Tên công thức",
+    dataIndex: "name",
+    key: "name",
+    render: (text) => <strong>{text}</strong>,
+  },
+  {
+    title: "Mô tả",
+    dataIndex: "desc",
+    key: "desc",
+    ellipsis: true,
+  },
+  {
+    title: "Món nấu",
+    dataIndex: "food",
+    key: "food",
+    render: (item) => (
+      <Space>
+        <Avatar src={item.image} />
+        <span>{item.name}</span>
+      </Space>
+    ),
+  },
+  {
+    title: "Nguyên liệu",
+    dataIndex: "materials",
+    key: "materials",
+    render: (items) => (
+      <div>
+        {items.map((item) => (
+          <Tooltip
+            key={item.id}
+            title={`${item.name} x${item.quantity} ${item.unit}`}
+          >
+            <Tag color="blue" style={{ marginBottom: "5px" }}>
+              {item.name}
+            </Tag>
+          </Tooltip>
+        ))}
+      </div>
+    ),
+  },
+  {
+    title: "Thao tác",
+    key: "actions",
+    render: (text, record) => (
+      <Space>
         <Button
           size="small"
           type="primary"
@@ -152,9 +180,18 @@ const CongThuc = () => {
         >
           Tạo dự định nấu
         </Button>
-      ),
-    },
-  ];
+        <Button
+          size="small"
+          type="danger"
+          icon={<DeleteOutlined />}
+          onClick={() => handleDelete(record.id)}
+        >
+          Xóa
+        </Button>
+      </Space>
+    ),
+  },
+];
 
   const [nauModalVisible, setNauModalVisible] = useState(false);
   const [idRecipe, setIdRecipe] = useState(null);

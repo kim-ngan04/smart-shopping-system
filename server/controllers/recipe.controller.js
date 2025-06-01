@@ -39,7 +39,7 @@ module.exports = {
         const { name, desc, idUser, idFood, materials } = req.body
 
         try {
-            const recipeQuery = `INSERT INTO recipe (name, \`desc\`, idFood, idUser) VALUES (?, ?, ?, ?)`
+            const recipeQuery = `INSERT INTO recipe (name, \`desc\`, idFood, idUser,use) VALUES (?, ?, ?, ?,'0')`
             const selectQuery = `
                 SELECT MAX(ID) as id FROM recipe;
             `;
@@ -86,6 +86,42 @@ module.exports = {
         } catch (error) {
             console.error('Error', error.message);
             return res.json({ success: false, message: 'Error' })
+        }
+    },
+    delete: async (req, res) => {
+        const { id } = req.params; // Lấy id từ URL
+
+        try {
+            // Xóa các nguyên liệu liên quan đến công thức
+            const deleteMaterialsQuery = `DELETE FROM recipematerial WHERE idRecipe = ?`;
+            await new Promise((resolve, reject) => {
+                connection.query(deleteMaterialsQuery, [id], (error, results, fields) => {
+                    if (error) {
+                        console.error(`Error deleting recipe materials: `, error);
+                        reject(error);
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+
+            // Xóa công thức
+            const deleteRecipeQuery = `DELETE FROM recipe WHERE id = ?`;
+            await new Promise((resolve, reject) => {
+                connection.query(deleteRecipeQuery, [id], (error, results, fields) => {
+                    if (error) {
+                        console.error(`Error deleting recipe: `, error);
+                        reject(error);
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+
+            return res.json({ success: true, message: 'Recipe deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting recipe: ', error.message);
+            return res.json({ success: false, message: 'Error deleting recipe' });
         }
     }
 }

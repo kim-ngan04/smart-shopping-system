@@ -38,6 +38,7 @@ router.post('/market/buy', marketController.buy);
 // recipe
 router.post('/recipe', recipeController.getAll)
 router.post('/recipe/add', recipeController.add)
+router.get('/recipe/delete/:id', recipeController.delete);
 
 // store
 router.get('/store/:idUser', storeController.getAll)
@@ -47,6 +48,7 @@ router.get('/store/delete/:id', storeController.delete)
 router.get('/cook/:idUser', cookController.getAll)
 router.post('/cook/add', cookController.add)
 router.get('/cook/delete/:id', cookController.delete)
+router.post('/cook/update/:id', cookController.updateStatus)
 
 // admin
 router.post('/admin/account/add', adminController.add);

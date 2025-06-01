@@ -100,13 +100,22 @@ const NauAn = () => {
     {
       title: "Thao tác",
       render: (text, record) => (
-        <Button
-          size="small"
-          type="danger"
-          onClick={() => handleDelete(record.id)}
-        >
-          Xóa
-        </Button>
+        <Space>
+          <Button
+            size="small"
+            type="danger"
+            onClick={() => handleDelete(record.id)}
+          >
+            Xóa
+          </Button>
+          <Button
+            size="small"
+            type="primary"
+            onClick={() => handleUpdateStatus(record.id)}
+          >
+            Đã nấu
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -121,6 +130,23 @@ const NauAn = () => {
       }
     } catch (error) {
       message.warning("Thất bại", error.message);
+    }
+  };
+
+  const handleUpdateStatus = async (id) => {
+    try {
+      const res = await fetch(`${BACK_END_URL}cook/update/${id}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success === true) {
+        fetchNauAn(user[0].id);
+        message.success("Cập nhật trạng thái thành công!");
+      } else {
+        message.error("Cập nhật trạng thái thất bại!");
+      }
+    } catch (error) {
+      message.error("Lỗi: " + error.message);
     }
   };
 

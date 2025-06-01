@@ -16,6 +16,7 @@ import {
   message,
   Empty,
   Input,
+  Modal,
 } from "antd";
 import { useData } from "../../context/AppContext";
 import moment from "moment";
@@ -25,9 +26,11 @@ const { Title } = Typography;
 const { Search } = Input;
 
 const Kho = () => {
-  const { kho, user, fetchKho } = useData();
+  const { kho, user, fetchKho, congThuc } = useData();
   const [searchText, setSearchText] = useState("");
   const [filteredKho, setFilteredKho] = useState([]);
+  const [suggestedDishes, setSuggestedDishes] = useState([]);
+  const [suggestionModalVisible, setSuggestionModalVisible] = useState(false);
 
   useEffect(() => {
     if (user && user[0] && user[0].id) {
@@ -42,6 +45,21 @@ const Kho = () => {
     );
     setFilteredKho(filteredData);
   }, [kho, searchText]);
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+  };
+
+  const handleSuggestDishes = () => {
+    const suggestions = congThuc.filter((recipe) => {
+      return recipe.materials.every((material) => {
+        const inventoryItem = kho.find((item) => item.food.id === material.id);
+        return inventoryItem && inventoryItem.quantity >= material.quantity;
+      });
+    });
+    setSuggestedDishes(suggestions);
+    setSuggestionModalVisible(true);
+  };
 
   const columns = [
     {
@@ -98,17 +116,16 @@ const Kho = () => {
     },
     {
       title: "Thao tác",
+      key: "actions",
       render: (text, record) => (
         <Space>
-          {user && user[0] && user[0].role === 1 && (
-            <Button
-              size="small"
-              onClick={() => handleDelete(record.id)}
-              type="danger"
-            >
-              Xóa
-            </Button>
-          )}
+          <Button
+            size="small"
+            type="danger"
+            onClick={() => handleDelete(record.id)}
+          >
+            Xóa
+          </Button>
         </Space>
       ),
     },
@@ -125,10 +142,6 @@ const Kho = () => {
     } catch (error) {
       message.warning("Thất bại", error.message);
     }
-  };
-
-  const handleSearch = (value) => {
-    setSearchText(value);
   };
 
   return (
@@ -150,6 +163,9 @@ const Kho = () => {
                     Thêm món đồ
                   </Button>
                 )}
+                <Button type="default" onClick={handleSuggestDishes}>
+                  Gợi ý món ăn
+                </Button>
                 <Search
                   placeholder="Tìm kiếm món đồ"
                   onSearch={handleSearch}
@@ -176,6 +192,31 @@ const Kho = () => {
           </Card>
         </Col>
       </Row>
+      <Modal
+        visible={suggestionModalVisible}
+        onCancel={() => setSuggestionModalVisible(false)}
+        footer={null}
+        title="Gợi ý món ăn"
+      >
+        {suggestedDishes.length > 0 ? (
+          <ul>
+            {suggestedDishes.map((dish) => (
+              <li key={dish.id} style={{ marginBottom: "10px" }}>
+                <strong>{dish.name}</strong>: {dish.desc}
+                <ul style={{ marginLeft: "20px" }}>
+                  {dish.materials.map((material) => (
+                    <li key={material.id}>
+                      {material.name} x{material.quantity} {material.unit}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty description="Không có món ăn phù hợp" />
+        )}
+      </Modal>
     </div>
   );
 };
