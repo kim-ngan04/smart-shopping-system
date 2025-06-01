@@ -10,7 +10,8 @@ import {
   Tag,
   Typography,
   message,
-  Empty
+  Empty,
+  Input,
 } from "antd";
 import { useData } from "../../context/AppContext";
 import ThemMonDoModal from "./ThemMonDoModal";
@@ -24,6 +25,16 @@ const MonDo = () => {
   useEffect(() => {
     fetchMonDo(user[0].id);
   }, []);
+
+  const [searchText, setSearchText] = useState("");
+  const [filteredMonDo, setFilteredMonDo] = useState(monDo);
+
+  useEffect(() => {
+    const filteredData = monDo.filter((item) =>
+      item.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredMonDo(filteredData);
+  }, [searchText, monDo]);
 
   const columns = [
     {
@@ -105,16 +116,24 @@ const MonDo = () => {
               </Title>
             }
             extra={
-              <Button type="primary" onClick={handleAdd}>
-                Thêm món đồ
-              </Button>
+              <Space>
+                <Input.Search
+                  placeholder="Tìm kiếm món đồ"
+                  onSearch={(value) => setSearchText(value)}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  style={{ width: 200 }}
+                />
+                <Button type="primary" onClick={handleAdd}>
+                  Thêm món đồ
+                </Button>
+              </Space>
             }
           >
-            {monDo.length > 0 ? (
+            {filteredMonDo.length > 0 ? (
               <Table
                 pagination={false}
                 columns={columns}
-                dataSource={monDo}
+                dataSource={filteredMonDo}
                 className="ant-border-space"
                 rowKey={(record) => record.id}
               />
