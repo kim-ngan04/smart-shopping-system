@@ -18,6 +18,7 @@ import {
   Typography,
   Empty,
   message,
+  Tooltip,
 } from "antd";
 import {
   BarChart,
@@ -25,7 +26,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as ChartTooltip,
   ResponsiveContainer,
   Legend,
 } from "recharts";
@@ -136,72 +137,72 @@ const CongThuc = () => {
   };
 
   const columns = [
-  {
-    title: "Tên công thức",
-    dataIndex: "name",
-    key: "name",
-    render: (text) => <strong>{text}</strong>,
-  },
-  {
-    title: "Mô tả",
-    dataIndex: "desc",
-    key: "desc",
-    ellipsis: true,
-  },
-  {
-    title: "Món nấu",
-    dataIndex: "food",
-    key: "food",
-    render: (item) => (
-      <Space>
-        <Avatar src={item.image} />
-        <span>{item.name}</span>
-      </Space>
-    ),
-  },
-  {
-    title: "Nguyên liệu",
-    dataIndex: "materials",
-    key: "materials",
-    render: (items) => (
-      <div>
-        {items.map((item) => (
-          <Tooltip
-            key={item.id}
-            title={`${item.name} x${item.quantity} ${item.unit}`}
+    {
+      title: "Tên công thức",
+      dataIndex: "name",
+      key: "name",
+      render: (text) => <strong>{text}</strong>,
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "desc",
+      key: "desc",
+      ellipsis: true,
+    },
+    {
+      title: "Món nấu",
+      dataIndex: "food",
+      key: "food",
+      render: (item) => (
+        <Space>
+          <Avatar src={item.image} />
+          <span>{item.name}</span>
+        </Space>
+      ),
+    },
+    {
+      title: "Nguyên liệu",
+      dataIndex: "materials",
+      key: "materials",
+      render: (items) => (
+        <div>
+          {items && items.map((item) => (
+            <Tooltip
+              key={item.id}
+              title={`${item.name} x${item.quantity} ${item.unit}`}
+            >
+              <Tag color="blue" style={{ marginBottom: "5px" }}>
+                {item.name}
+              </Tag>
+            </Tooltip>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      render: (text, record) => (
+        <Space>
+          <Button
+            size="small"
+            type="primary"
+            onClick={() => handleNau(record.id)}
           >
-            <Tag color="blue" style={{ marginBottom: "5px" }}>
-              {item.name}
-            </Tag>
-          </Tooltip>
-        ))}
-      </div>
-    ),
-  },
-  {
-    title: "Thao tác",
-    key: "actions",
-    render: (text, record) => (
-      <Space>
-        <Button
-          size="small"
-          type="primary"
-          onClick={() => handleNau(record.id)}
-        >
-          Tạo dự định nấu
-        </Button>
-        <Button
-          size="small"
-          type="danger"
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record.id)}
-        >
-          Xóa
-        </Button>
-      </Space>
-    ),
-  },
-];
+            Tạo dự định nấu
+          </Button>
+          <Button
+            size="small"
+            type="danger"
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record.id)}
+          >
+            Xóa
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
   const [nauModalVisible, setNauModalVisible] = useState(false);
   const [idRecipe, setIdRecipe] = useState(null);
@@ -254,26 +255,24 @@ const CongThuc = () => {
             }
           >
             {topRecipes.length > 0 ? (
-          <>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={topRecipes}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="use" fill="#FF7F50" name="Số lần sử dụng" />
-              </BarChart>
-            </ResponsiveContainer>
-
-          </>
-        ) : (
-          <Empty description="Không có dữ liệu" />
-        )}
-
+              <>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={topRecipes}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <ChartTooltip />
+                    <Legend />
+                    <Bar dataKey="use" fill="#FF7F50" name="Số lần sử dụng" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </>
+            ) : (
+              <Empty description="Không có dữ liệu" />
+            )}
           </Card>
         </Col>
       </Row>

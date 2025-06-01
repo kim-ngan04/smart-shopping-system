@@ -36,13 +36,12 @@ module.exports = {
         })
     },
     add: async (req, res) => {
-        const { name, desc, idUser, idFood, materials } = req.body
+        const { name, desc, idUser, idFood, materials } = req.body;
 
         try {
-            const recipeQuery = `INSERT INTO recipe (name, \`desc\`, idFood, idUser,use) VALUES (?, ?, ?, ?,'0')`
-            const selectQuery = `
-                SELECT MAX(ID) as id FROM recipe;
-            `;
+            const recipeQuery = `INSERT INTO recipe (name, \`desc\`, idFood, idUser, \`use\`) VALUES (?, ?, ?, ?, 0)`;
+            const selectQuery = `SELECT MAX(ID) as id FROM recipe;`;
+
             const recipe = await new Promise((resolve, reject) => {
                 connection.query(recipeQuery, [name, desc, idFood, idUser],
                     (error, results, fields) => {
@@ -52,8 +51,9 @@ module.exports = {
                         } else {
                             resolve(results);
                         }
-                    })
-            })
+                    });
+            });
+
             const recipeId = await new Promise((resolve, reject) => {
                 connection.query(selectQuery,
                     (error, results, fields) => {
@@ -63,10 +63,10 @@ module.exports = {
                         } else {
                             resolve(results);
                         }
-                    })
-            })
+                    });
+            });
 
-            const recipeMaterialQuery = `INSERT INTO recipematerial (idMaterial, idRecipe, quantity) VALUES (?, ?, ?)`
+            const recipeMaterialQuery = `INSERT INTO recipematerial (idMaterial, idRecipe, quantity) VALUES (?, ?, ?)`;
             for (let i = 0; i < materials.length; ++i) {
                 await new Promise((resolve, reject) => {
                     connection.query(recipeMaterialQuery, [materials[i].id, recipeId[0].id, materials[i].quantity],
@@ -77,15 +77,14 @@ module.exports = {
                             } else {
                                 resolve(results);
                             }
-                        })
-                })
+                        });
+                });
             }
 
-
-            return res.json({ success: true })
+            return res.json({ success: true });
         } catch (error) {
             console.error('Error', error.message);
-            return res.json({ success: false, message: 'Error' })
+            return res.json({ success: false, message: 'Error' });
         }
     },
     delete: async (req, res) => {
