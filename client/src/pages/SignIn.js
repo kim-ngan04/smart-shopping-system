@@ -34,8 +34,24 @@ const SignIn = () => {
   };
 
   return (
-    <Layout className="layout-default layout-signin" style={{ minHeight: "100vh", padding : 0 , margin : 0 }}>
-      <Content className="signin" style={{ minHeight: "100vh", padding : 0 , margin : 0 }}>
+    <Layout
+      className="layout-default layout-signin"
+      style={{
+        height: "100vh", // Đảm bảo chiều cao luôn bằng 100% viewport
+        overflow: "hidden", // Ẩn nội dung vượt quá màn hình
+        padding: 0,
+        margin: 0,
+      }}
+    >
+      <Content
+        className="signin"
+        style={{
+          height: "100vh", // Đảm bảo chiều cao luôn bằng 100% viewport
+          overflow: "hidden", // Ẩn nội dung vượt quá màn hình
+          padding: 0,
+          margin: 0,
+        }}
+      >
         <Row style={{ height: "100%" }}>
           {/* Cột bên trái: Hình ảnh */}
           <Col
